@@ -21,11 +21,16 @@ public class FlashcardController : ControllerBase
     [HttpGet("{Id}")]
     public async Task<IActionResult> GetById(Guid Id)
     {
-        var flashcard = await _context.Flashcards.FindAsync(Id);
+        var flashcard = await _context.Flashcards
+            .Include(d => d.Deck)
+            .Where(d => d.Id == Id)
+            .FirstOrDefaultAsync();
+
         if (flashcard == null)
         {
             return NotFound();
         }
+
         return Ok(flashcard);
     }
 
@@ -72,10 +77,12 @@ public class FlashcardController : ControllerBase
     public async Task<IActionResult> Put([FromBody] Flashcard flashcard)
     {
         var existingFlashcard = await _context.Flashcards.FindAsync(flashcard.Id);
+
         if (existingFlashcard == null)
         {
             return NotFound();
         }
+
         try
         { 
             _context.Flashcards.Update(flashcard);
@@ -92,10 +99,12 @@ public class FlashcardController : ControllerBase
     public async Task<IActionResult> Delete(Guid Id)
     {
         var flashcard = await _context.Flashcards.FindAsync(Id);
+
         if (flashcard == null)
         {
             return NotFound();
         }
+
         try
         {
             _context.Flashcards.Remove(flashcard);
