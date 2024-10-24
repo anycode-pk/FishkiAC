@@ -37,13 +37,27 @@ public class FlashcardController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromQuery] FlashcardDto flashcard)
+    public async Task<IActionResult> Post([FromQuery] FlashcardDto flashcardDto)
     {
+        var deck = await _context.Decks.FindAsync(flashcardDto.DeckId);
+
+        if (deck == null)
+        {
+            return NotFound();
+        }
+
+        var flashcard = new Flashcard
+        {
+            Question = flashcardDto.Question,
+            Answer = flashcardDto.Answer,
+            Deck = deck
+        }; 
+
         try
         {
             await _context.AddAsync(flashcard);
             await _context.SaveChangesAsync();
-            return Ok($"Added new flashcard: {flashcard}");
+            return Ok(flashcard);
         } 
         catch (Exception e)
         {
