@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FishkiAC.Context;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FishkiAC.Controllers;
 
@@ -6,8 +7,11 @@ namespace FishkiAC.Controllers;
 [Route("/api/v1/Deck")]
 public class DeckController : ControllerBase
 {
-    public DeckController()
+    private readonly ApplicationDbContext _context;
+
+    public DeckController(ApplicationDbContext context)
     {
+        _context = context;
     }
 
     [HttpGet("{Id}")]
