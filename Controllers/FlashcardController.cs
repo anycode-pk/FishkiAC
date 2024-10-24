@@ -43,6 +43,16 @@ public class FlashcardController : ControllerBase
         return flashcards;
     }
 
+    [HttpGet("by-deck")]
+    public async Task<IEnumerable<Flashcard>> GetAllByDeck([FromQuery] Guid DeckId)
+    {
+        var flashcards = await _context.Flashcards
+            .Include(d => d.Deck)
+            .Where(d => d.Deck.Id == DeckId)
+            .ToListAsync();
+        return flashcards;
+    }
+
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] FlashcardDto flashcardDto)
     {
