@@ -97,7 +97,7 @@ public class FlashcardController : ControllerBase
         { 
             _context.Flashcards.Update(flashcard);
             await _context.SaveChangesAsync();
-            return Ok($"Updated flashcard: {flashcard}");
+            return Ok(flashcard);
         }
         catch (Exception e)
         {
@@ -119,7 +119,7 @@ public class FlashcardController : ControllerBase
         {
             _context.Flashcards.Remove(flashcard);
             await _context.SaveChangesAsync();
-            return Ok($"Deleted flashcard: {flashcard}");
+            return Ok(flashcard);
         }
         catch (Exception e)
         {
