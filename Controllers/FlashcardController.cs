@@ -1,7 +1,11 @@
 ﻿namespace FishkiAC.Controllers;
 
 using FishkiAC.Context;
+using FishkiAC.DTOs;
+using FishkiAC.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
 
 [ApiController]
 [Route("/api/v1/Flashcard")]
@@ -15,32 +19,76 @@ public class FlashcardController : ControllerBase
     }
 
     [HttpGet("{Id}")]
-    public IActionResult GetById(Guid Id)
+    public async Task<IActionResult> GetById(Guid Id)
     {
-        return Ok($"Hello, World! id: {Id}");
+        var flashcard = await _context.Flashcards.FindAsync(Id);
+        if (flashcard == null)
+        {
+            return NotFound();
+        }
+        return Ok(flashcard);
     }
 
     [HttpGet]
-    public IEnumerable<string> GetAll()
+    public async Task<IEnumerable<Flashcard>> GetAll()
     {
-        return new List<string> { "value1", "value2" };
+        var flashcards = await _context.Flashcards.ToListAsync();
+        return flashcards;
     }
 
     [HttpPost]
-    public IActionResult Post([FromBody] string value)
+    public async Task<IActionResult> Post([FromQuery] FlashcardDto flashcard)
     {
-        return Ok($"Hello, World! value: {value}");
+        try
+        {
+            await _context.AddAsync(flashcard);
+            await _context.SaveChangesAsync();
+            return Ok($"Added new flashcard: {flashcard}");
+        } 
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+        
     }
 
     [HttpPut]
-    public IActionResult Put(Guid Id, [FromBody] string value)
+    public async Task<IActionResult> Put([FromBody] Flashcard flashcard)
     {
-        return Ok($"Hello, World! id: {Id}, value: {value}");
+        var existingFlashcard = _context.Flashcards.Where(f => f.Id == flashcard.Id).FirstOrDefaultAsync();
+        if (existingFlashcard == null)
+        {
+            return NotFound();
+        }
+        try
+        { 
+            _context.Flashcards.Update(flashcard);
+            await _context.SaveChangesAsync();
+            return Ok($"Updated flashcard: {flashcard}");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
-    [HttpDelete]
-    public IActionResult Delete(Guid Id)
+    [HttpDelete("{Id}")]
+    public async Task<IActionResult> Delete(Guid Id)
     {
-        return Ok($"Hello, World! id: {Id}");
+        var flashcard = await _context.Flashcards.FindAsync(Id);
+        if (flashcard == null)
+        {
+            return NotFound();
+        }
+        try
+        {
+            _context.Flashcards.Remove(flashcard);
+            await _context.SaveChangesAsync();
+            return Ok($"Deleted flashcard: {flashcard}");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 }
