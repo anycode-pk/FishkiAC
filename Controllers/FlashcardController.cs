@@ -32,12 +32,14 @@ public class FlashcardController : ControllerBase
     [HttpGet]
     public async Task<IEnumerable<Flashcard>> GetAll()
     {
-        var flashcards = await _context.Flashcards.ToListAsync();
+        var flashcards = await _context.Flashcards
+            .Include(d => d.Deck)
+            .ToListAsync();
         return flashcards;
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromQuery] FlashcardDto flashcardDto)
+    public async Task<IActionResult> Post([FromBody] FlashcardDto flashcardDto)
     {
         var deck = await _context.Decks.FindAsync(flashcardDto.DeckId);
 
