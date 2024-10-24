@@ -36,23 +36,23 @@ public class DeckController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] DeckDTO deckDTO)
+    public async Task<IActionResult> Post([FromBody] DeckDto deckDto)
     {
-        var deck = new Deck { Name = deckDTO.Name };
+        var deck = new Deck { Name = deckDto.Name };
         await _context.Decks.AddAsync(deck);
         await _context.SaveChangesAsync();
         return Ok(deck);
     }
 
     [HttpPut]
-    public async Task<IActionResult> Put(Guid Id, [FromBody] string value)
+    public async Task<IActionResult> Put(Guid Id, [FromBody] DeckDto deckDto)
     {
         var deck = await _context.Decks.FindAsync(Id);
         if (deck == null)
         {
             return NotFound();
         }
-        deck.Name = value;
+        deck.Name = deckDto.Name;
         await _context.SaveChangesAsync();
         return Ok(deck);
     }
