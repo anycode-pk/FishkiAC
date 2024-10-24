@@ -57,7 +57,7 @@ public class DeckController : ControllerBase
         return Ok(deck);
     }
 
-    [HttpDelete]
+    [HttpDelete("{Id}")]
     public async Task<IActionResult> Delete(Guid Id)
     {
         var deck = await _context.Decks.FindAsync(Id);
