@@ -55,7 +55,7 @@ public class FlashcardController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> Put([FromBody] Flashcard flashcard)
     {
-        var existingFlashcard = _context.Flashcards.Where(f => f.Id == flashcard.Id).FirstOrDefaultAsync();
+        var existingFlashcard = await _context.Flashcards.FindAsync(flashcard.Id);
         if (existingFlashcard == null)
         {
             return NotFound();
