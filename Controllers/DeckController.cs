@@ -1,7 +1,10 @@
-﻿using FishkiAC.Context;
-using Microsoft.AspNetCore.Mvc;
+﻿namespace FishkiAC.Controllers;
 
-namespace FishkiAC.Controllers;
+using FishkiAC.Context;
+using FishkiAC.DTOs;
+using FishkiAC.Entities;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("/api/v1/Deck")]
@@ -15,32 +18,55 @@ public class DeckController : ControllerBase
     }
 
     [HttpGet("{Id}")]
-    public IActionResult GetById(Guid Id)
+    public async Task<IActionResult> GetById(Guid Id)
     {
-        return Ok($"Hello, World! id: {Id}");
+        var deck = await _context.Decks.FindAsync(Id);
+        if (deck == null)
+        {
+            return NotFound();
+        }
+        return Ok(deck);
     }
 
     [HttpGet]
-    public IEnumerable<string> GetAll()
+    public async Task<IEnumerable<Deck>> GetAll()
     {
-        return new List<string> { "value1", "value2" };
+        var decks = await _context.Decks.ToListAsync();
+        return decks;
     }
 
     [HttpPost]
-    public IActionResult Post([FromBody] string value)
+    public async Task<IActionResult> Post([FromBody] DeckDTO deckDTO)
     {
-        return Ok($"Hello, World! value: {value}");
+        var deck = new Deck { Name = deckDTO.Name };
+        await _context.Decks.AddAsync(deck);
+        await _context.SaveChangesAsync();
+        return Ok(deck);
     }
 
     [HttpPut]
-    public IActionResult Put(Guid Id, [FromBody] string value)
+    public async Task<IActionResult> Put(Guid Id, [FromBody] string value)
     {
-        return Ok($"Hello, World! id: {Id}, value: {value}");
+        var deck = await _context.Decks.FindAsync(Id);
+        if (deck == null)
+        {
+            return NotFound();
+        }
+        deck.Name = value;
+        await _context.SaveChangesAsync();
+        return Ok(deck);
     }
 
     [HttpDelete]
-    public IActionResult Delete(Guid Id)
+    public async Task<IActionResult> Delete(Guid Id)
     {
-        return Ok($"Hello, World! id: {Id}");
+        var deck = await _context.Decks.FindAsync(Id);
+        if (deck == null)
+        {
+            return NotFound();
+        }
+        _context.Decks.Remove(deck);
+        await _context.SaveChangesAsync();
+        return Ok();
     }
 }

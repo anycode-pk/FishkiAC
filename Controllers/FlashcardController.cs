@@ -1,7 +1,7 @@
-﻿using FishkiAC.Context;
-using Microsoft.AspNetCore.Mvc;
+﻿namespace FishkiAC.Controllers;
 
-namespace FishkiAC.Controllers;
+using FishkiAC.Context;
+using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("/api/v1/Flashcard")]
