@@ -1,0 +1,6 @@
+@FishkiAC_HostAddress = http://localhost:5152
+
+GET {{FishkiAC_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
