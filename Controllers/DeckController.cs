@@ -39,9 +39,16 @@ public class DeckController : ControllerBase
     public async Task<IActionResult> Post([FromBody] DeckDto deckDto)
     {
         var deck = new Deck { Name = deckDto.Name };
-        await _context.Decks.AddAsync(deck);
-        await _context.SaveChangesAsync();
-        return Ok(deck);
+        try
+        {
+            await _context.Decks.AddAsync(deck);
+            await _context.SaveChangesAsync();
+            return Ok(deck);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
     [HttpPut]
@@ -53,8 +60,16 @@ public class DeckController : ControllerBase
             return NotFound();
         }
         deck.Name = deckDto.Name;
-        await _context.SaveChangesAsync();
-        return Ok(deck);
+        try
+        {
+            await _context.SaveChangesAsync();
+            return Ok(deck);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+        
     }
 
     [HttpDelete("{Id}")]
@@ -65,8 +80,16 @@ public class DeckController : ControllerBase
         {
             return NotFound();
         }
-        _context.Decks.Remove(deck);
-        await _context.SaveChangesAsync();
-        return Ok();
+        try
+        {
+            _context.Decks.Remove(deck);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+        
     }
 }
