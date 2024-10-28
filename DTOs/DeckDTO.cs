@@ -1,6 +1,6 @@
 ﻿namespace FishkiAC.DTOs;
 
-public class DeckDTO
+public class DeckDto
 {
     public required string Name { get; set; }
 }

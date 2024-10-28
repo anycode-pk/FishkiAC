@@ -36,28 +36,43 @@ public class DeckController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] DeckDTO deckDTO)
+    public async Task<IActionResult> Post([FromBody] DeckDto deckDto)
     {
-        var deck = new Deck { Name = deckDTO.Name };
-        await _context.Decks.AddAsync(deck);
-        await _context.SaveChangesAsync();
-        return Ok(deck);
+        var deck = new Deck { Name = deckDto.Name };
+        try
+        {
+            await _context.Decks.AddAsync(deck);
+            await _context.SaveChangesAsync();
+            return Ok(deck);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
     [HttpPut]
-    public async Task<IActionResult> Put(Guid Id, [FromBody] string value)
+    public async Task<IActionResult> Put(Guid Id, [FromBody] DeckDto deckDto)
     {
         var deck = await _context.Decks.FindAsync(Id);
         if (deck == null)
         {
             return NotFound();
         }
-        deck.Name = value;
-        await _context.SaveChangesAsync();
-        return Ok(deck);
+        deck.Name = deckDto.Name;
+        try
+        {
+            await _context.SaveChangesAsync();
+            return Ok(deck);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+        
     }
 
-    [HttpDelete]
+    [HttpDelete("{Id}")]
     public async Task<IActionResult> Delete(Guid Id)
     {
         var deck = await _context.Decks.FindAsync(Id);
@@ -65,8 +80,16 @@ public class DeckController : ControllerBase
         {
             return NotFound();
         }
-        _context.Decks.Remove(deck);
-        await _context.SaveChangesAsync();
-        return Ok();
+        try
+        {
+            _context.Decks.Remove(deck);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+        
     }
 }

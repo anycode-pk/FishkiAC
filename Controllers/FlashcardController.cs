@@ -21,29 +21,60 @@ public class FlashcardController : ControllerBase
     [HttpGet("{Id}")]
     public async Task<IActionResult> GetById(Guid Id)
     {
-        var flashcard = await _context.Flashcards.FindAsync(Id);
+        var flashcard = await _context.Flashcards
+            .Include(d => d.Deck)
+            .Where(d => d.Id == Id)
+            .FirstOrDefaultAsync();
+
         if (flashcard == null)
         {
             return NotFound();
         }
+
         return Ok(flashcard);
     }
 
     [HttpGet]
     public async Task<IEnumerable<Flashcard>> GetAll()
     {
-        var flashcards = await _context.Flashcards.ToListAsync();
+        var flashcards = await _context.Flashcards
+            .Include(d => d.Deck)
+            .ToListAsync();
+        return flashcards;
+    }
+
+    [HttpGet("by-deck")]
+    public async Task<IEnumerable<Flashcard>> GetAllByDeck([FromQuery] Guid DeckId)
+    {
+        var flashcards = await _context.Flashcards
+            .Include(d => d.Deck)
+            .Where(d => d.Deck.Id == DeckId)
+            .ToListAsync();
         return flashcards;
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromQuery] FlashcardDto flashcard)
+    public async Task<IActionResult> Post([FromBody] FlashcardDto flashcardDto)
     {
+        var deck = await _context.Decks.FindAsync(flashcardDto.DeckId);
+
+        if (deck == null)
+        {
+            return NotFound();
+        }
+
+        var flashcard = new Flashcard
+        {
+            Question = flashcardDto.Question,
+            Answer = flashcardDto.Answer,
+            Deck = deck
+        }; 
+
         try
         {
             await _context.AddAsync(flashcard);
             await _context.SaveChangesAsync();
-            return Ok($"Added new flashcard: {flashcard}");
+            return Ok(flashcard);
         } 
         catch (Exception e)
         {
@@ -55,16 +86,18 @@ public class FlashcardController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> Put([FromBody] Flashcard flashcard)
     {
-        var existingFlashcard = _context.Flashcards.Where(f => f.Id == flashcard.Id).FirstOrDefaultAsync();
+        var existingFlashcard = await _context.Flashcards.FindAsync(flashcard.Id);
+
         if (existingFlashcard == null)
         {
             return NotFound();
         }
+
         try
         { 
             _context.Flashcards.Update(flashcard);
             await _context.SaveChangesAsync();
-            return Ok($"Updated flashcard: {flashcard}");
+            return Ok(flashcard);
         }
         catch (Exception e)
         {
@@ -76,15 +109,17 @@ public class FlashcardController : ControllerBase
     public async Task<IActionResult> Delete(Guid Id)
     {
         var flashcard = await _context.Flashcards.FindAsync(Id);
+
         if (flashcard == null)
         {
             return NotFound();
         }
+
         try
         {
             _context.Flashcards.Remove(flashcard);
             await _context.SaveChangesAsync();
-            return Ok($"Deleted flashcard: {flashcard}");
+            return Ok(flashcard);
         }
         catch (Exception e)
         {
