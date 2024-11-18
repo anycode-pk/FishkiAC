@@ -36,7 +36,7 @@ public class FlashcardController : ControllerBase
             Id = flashcard.Id,
             Question = flashcard.Question,
             Answer = flashcard.Answer,
-            Deck = new FlashcardDeckDto
+            Deck = new SimpleDeckDto
             {
                 Id = flashcard.Deck.Id,
                 Name = flashcard.Deck.Name
@@ -58,7 +58,7 @@ public class FlashcardController : ControllerBase
             Id = f.Id,
             Question = f.Question,
             Answer = f.Answer,
-            Deck = new FlashcardDeckDto
+            Deck = new SimpleDeckDto
             {
                 Id = f.Deck.Id,
                 Name = f.Deck.Name
@@ -67,7 +67,7 @@ public class FlashcardController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] flashcardInDto flashcardDto)
+    public async Task<IActionResult> Post([FromBody] FlashcardInDto flashcardDto)
     {
         var deck = await _context.Decks.FindAsync(flashcardDto.DeckId);
 
@@ -87,7 +87,7 @@ public class FlashcardController : ControllerBase
         try
         {
             await _context.SaveChangesAsync();
-            return Ok(new FlashcardDto { Id = flashcard.Id, Question = flashcard.Question, Answer = flashcard.Answer, Deck = new FlashcardDeckDto { Id = deck.Id, Name = deck.Name } });
+            return Ok(new FlashcardDto { Id = flashcard.Id, Question = flashcard.Question, Answer = flashcard.Answer, Deck = new SimpleDeckDto { Id = deck.Id, Name = deck.Name } });
         }
         catch (Exception e)
         {
@@ -97,7 +97,7 @@ public class FlashcardController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<IActionResult> Put(Guid Id, [FromBody] flashcardInDto flashcardInDto)
+    public async Task<IActionResult> Put(Guid Id, [FromBody] FlashcardInDto flashcardInDto)
     {
         var existingFlashcard = await _context.Flashcards.FindAsync(Id);
 

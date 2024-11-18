@@ -1,6 +1,6 @@
 ﻿namespace FishkiAC.DTOs;
 
-public class FlashcardDeckDto
+public class SimpleDeckDto
 {
     public Guid Id { get; set; }
     public required string Name { get; set; }

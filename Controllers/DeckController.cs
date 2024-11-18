@@ -30,7 +30,7 @@ public class DeckController : ControllerBase
         {
             Id = deck.Id,
             Name = deck.Name,
-            Flashcards = deck.Flashcards.Select(f => new DeckFlashcardDto
+            Flashcards = deck.Flashcards.Select(f => new SimpleFlashcardDto
             {
                 Id = f.Id,
                 Question = f.Question,
@@ -48,7 +48,7 @@ public class DeckController : ControllerBase
         {
             Id = d.Id,
             Name = d.Name,
-            Flashcards = d.Flashcards.Select(f => new DeckFlashcardDto
+            Flashcards = d.Flashcards.Select(f => new SimpleFlashcardDto
             {
                 Id = f.Id,
                 Question = f.Question,

@@ -1,8 +1,8 @@
 ﻿namespace FishkiAC.DTOs;
 
-public class flashcardInDto
+public class FlashcardInDto
 {
-    public string Question { get; set; }
-    public string Answer { get; set; }
+    public required string Question { get; set; }
+    public required string Answer { get; set; }
     public Guid DeckId { get; set; }
 }

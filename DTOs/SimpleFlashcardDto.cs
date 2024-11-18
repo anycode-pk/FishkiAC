@@ -2,7 +2,7 @@
 
 namespace FishkiAC.DTOs;
 
-public class DeckFlashcardDto
+public class SimpleFlashcardDto
 {
     public Guid Id { get; set; }
     public required string Question { get; set; }
