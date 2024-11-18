@@ -3,6 +3,7 @@
 using FishkiAC.Context;
 using FishkiAC.DTOs;
 using FishkiAC.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,10 +13,12 @@ using Microsoft.EntityFrameworkCore;
 public class FlashcardController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly IMediator _mediator;
 
-    public FlashcardController(ApplicationDbContext context)
+    public FlashcardController(ApplicationDbContext context, IMediator mediator)
     {
         _context = context;
+        _mediator = mediator;
     }
 
     [HttpGet("{Id}")]

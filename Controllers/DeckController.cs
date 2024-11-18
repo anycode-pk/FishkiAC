@@ -1,117 +1,53 @@
 ﻿namespace FishkiAC.Controllers;
 
-using FishkiAC.Context;
 using FishkiAC.DTOs;
-using FishkiAC.Entities;
+using FishkiAC.Handlers.Deck;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("/api/v1/Deck")]
 public class DeckController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IMediator _mediator;
 
-    public DeckController(ApplicationDbContext context)
+    public DeckController(IMediator mediator)
     {
-        _context = context;
+        _mediator = mediator;
     }
 
-    [HttpGet("{Id}")]
-    public async Task<IActionResult> GetById(Guid Id)
+    [HttpGet("ById")]
+    public async Task<IActionResult> GetById([FromQuery] GetDeckByIdQuery query)
     {
-        var deck = await _context.Decks.Include(f => f.Flashcards).Where(d => d.Id == Id).FirstOrDefaultAsync();
-        if (deck == null)
-        {
-            return NotFound();
-        }
-
-        var deckDto = new DeckDto
-        {
-            Id = deck.Id,
-            Name = deck.Name,
-            Flashcards = deck.Flashcards.Select(f => new SimpleFlashcardDto
-            {
-                Id = f.Id,
-                Question = f.Question,
-                Answer = f.Answer
-            }).ToList()
-        };
-        return Ok(deckDto);
+        var result = await _mediator.Send(query);
+        return result;
     }
 
     [HttpGet]
     public async Task<IEnumerable<DeckDto>> GetAll()
     {
-        var decks = await _context.Decks.Include(f => f.Flashcards).ToListAsync();
-        var decksDto = decks.Select(d => new DeckDto
-        {
-            Id = d.Id,
-            Name = d.Name,
-            Flashcards = d.Flashcards.Select(f => new SimpleFlashcardDto
-            {
-                Id = f.Id,
-                Question = f.Question,
-                Answer = f.Answer
-            }).ToList()
-        });
-        return decksDto;
+        var result = await _mediator.Send(new GetAllDecksQuery());
+        return result;
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] DeckInDto deckInDto)
+    public async Task<IActionResult> Post(CreateDeckCommand command)
     {
-        var deck = new Deck { Name = deckInDto.Name };
-        try
-        {
-            await _context.Decks.AddAsync(deck);
-            await _context.SaveChangesAsync();
-            return Ok(deck);
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
+        var result = await _mediator.Send(command);
+        return result;
     }
 
     [HttpPut]
     public async Task<IActionResult> Put(Guid Id, [FromBody] DeckInDto deckInDto)
     {
-        var deck = await _context.Decks.FindAsync(Id);
-        if (deck == null)
-        {
-            return NotFound();
-        }
-        deck.Name = deckInDto.Name;
-        try
-        {
-            await _context.SaveChangesAsync();
-            return Ok(deck);
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
-        
+        var result = await _mediator.Send(new UpdateDeckCommand { Id = Id, deckInDto = deckInDto });
+        return result;
     }
 
     [HttpDelete("{Id}")]
     public async Task<IActionResult> Delete(Guid Id)
     {
-        var deck = await _context.Decks.FindAsync(Id);
-        if (deck == null)
-        {
-            return NotFound();
-        }
-        try
-        {
-            _context.Decks.Remove(deck);
-            await _context.SaveChangesAsync();
-            return Ok();
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
+        var result = await _mediator.Send(new DeleteDeckCommand { Id = Id });
+        return result;
     }
 }

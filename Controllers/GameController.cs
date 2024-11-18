@@ -1,8 +1,7 @@
 ﻿namespace FishkiAC.Controllers;
 
 using FishkiAC.Context;
-using FishkiAC.DTOs;
-using FishkiAC.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +10,12 @@ using Microsoft.EntityFrameworkCore;
 public class GameController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly IMediator _mediator;
 
-    public GameController(ApplicationDbContext context)
+    public GameController(ApplicationDbContext context, IMediator mediator)
     {
         _context = context;
+        _mediator = mediator;
     }
 
     [HttpGet]
