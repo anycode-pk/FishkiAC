@@ -31,9 +31,9 @@ public class DeckController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post(CreateDeckCommand command)
+    public async Task<IActionResult> Post([FromBody] DeckInDto deckInDto)
     {
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(new CreateDeckCommand { deckInDto = deckInDto});
         return result;
     }
 

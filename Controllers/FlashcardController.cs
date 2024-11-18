@@ -32,9 +32,9 @@ public class FlashcardController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post(CreateFlashcardCommand command)
+    public async Task<IActionResult> Post([FromBody] FlashcardInDto flashcardInDto)
     {
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(new CreateFlashcardCommand { FlashcardInDto = flashcardInDto});
         return result;
     }
 

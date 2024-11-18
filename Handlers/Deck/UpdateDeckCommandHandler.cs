@@ -1,9 +1,9 @@
-﻿using FishkiAC.Context;
+﻿namespace FishkiAC.Handlers.Deck;
+
+using FishkiAC.Context;
 using FishkiAC.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-
-namespace FishkiAC.Handlers.Deck;
 
 public sealed record UpdateDeckCommand() : IRequest<IActionResult>
 {

@@ -1,10 +1,10 @@
-﻿using FishkiAC.Context;
+﻿namespace FishkiAC.Handlers.Deck;
+
+using FishkiAC.Context;
 using FishkiAC.DTOs;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
-namespace FishkiAC.Handlers.Deck;
 
 public sealed record GetDeckByIdQuery() : IRequest<IActionResult>
 {
