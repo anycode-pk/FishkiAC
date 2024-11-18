@@ -1,146 +1,54 @@
 ﻿namespace FishkiAC.Controllers;
 
-using FishkiAC.Context;
 using FishkiAC.DTOs;
-using FishkiAC.Entities;
+using FishkiAC.Handlers.Flashcard;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 
 [ApiController]
 [Route("/api/v1/Flashcard")]
 public class FlashcardController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
     private readonly IMediator _mediator;
 
-    public FlashcardController(ApplicationDbContext context, IMediator mediator)
+    public FlashcardController(IMediator mediator)
     {
-        _context = context;
         _mediator = mediator;
     }
 
-    [HttpGet("{Id}")]
-    public async Task<IActionResult> GetById(Guid Id)
+    [HttpGet("ById")]
+    public async Task<IActionResult> GetById([FromQuery] GetFlashcardByIdQuery query)
     {
-        var flashcard = await _context.Flashcards
-            .Include(d => d.Deck)
-            .Where(d => d.Id == Id)
-            .FirstOrDefaultAsync();
-
-        if (flashcard == null)
-        {
-            return NotFound();
-        }
-
-        var flashcardDto = new FlashcardDto
-        {
-            Id = flashcard.Id,
-            Question = flashcard.Question,
-            Answer = flashcard.Answer,
-            Deck = new SimpleDeckDto
-            {
-                Id = flashcard.Deck.Id,
-                Name = flashcard.Deck.Name
-            }
-        };
-
-        return Ok(flashcardDto);
+        var result = await _mediator.Send(query);
+        return result;
     }
 
     [HttpGet]
     public async Task<IEnumerable<FlashcardDto>> GetAll()
     {
-        var flashcards = await _context.Flashcards
-            .Include(d => d.Deck)
-            .ToListAsync();
-
-        return flashcards.Select(f => new FlashcardDto
-        {
-            Id = f.Id,
-            Question = f.Question,
-            Answer = f.Answer,
-            Deck = new SimpleDeckDto
-            {
-                Id = f.Deck.Id,
-                Name = f.Deck.Name
-            }
-        });
+        var result = await _mediator.Send(new GetAllFlashcardsQuery());
+        return result;
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] FlashcardInDto flashcardDto)
+    public async Task<IActionResult> Post(CreateFlashcardCommand command)
     {
-        var deck = await _context.Decks.FindAsync(flashcardDto.DeckId);
-
-        if (deck == null)
-        {
-            return NotFound();
-        }
-
-        var flashcard = new Flashcard
-        {
-            Question = flashcardDto.Question,
-            Answer = flashcardDto.Answer,
-            Deck = deck
-        };
-        deck.Flashcards.Add(flashcard);
-
-        try
-        {
-            await _context.SaveChangesAsync();
-            return Ok(new FlashcardDto { Id = flashcard.Id, Question = flashcard.Question, Answer = flashcard.Answer, Deck = new SimpleDeckDto { Id = deck.Id, Name = deck.Name } });
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
-
+        var result = await _mediator.Send(command);
+        return result;
     }
 
     [HttpPut]
     public async Task<IActionResult> Put(Guid Id, [FromBody] FlashcardInDto flashcardInDto)
     {
-        var existingFlashcard = await _context.Flashcards.FindAsync(Id);
-
-        if (existingFlashcard == null)
-        {
-            return NotFound();
-        }
-        existingFlashcard.Question = flashcardInDto.Question;
-        existingFlashcard.Answer = flashcardInDto.Answer;
-        existingFlashcard.Deck = await _context.Decks.FindAsync(flashcardInDto.DeckId);
-        try
-        {
-            await _context.SaveChangesAsync();
-            return Ok(flashcardInDto);
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
+        var result = await _mediator.Send(new UpdateFlashcardCommand { Id = Id, FlashcardInDto = flashcardInDto });
+        return result;
     }
 
     [HttpDelete("{Id}")]
     public async Task<IActionResult> Delete(Guid Id)
     {
-        var flashcard = await _context.Flashcards.FindAsync(Id);
-
-        if (flashcard == null)
-        {
-            return NotFound();
-        }
-
-        try
-        {
-            _context.Flashcards.Remove(flashcard);
-            await _context.SaveChangesAsync();
-            return Ok(flashcard);
-        }
-        catch (Exception e)
-        {
-            return BadRequest(e.Message);
-        }
+        var result = await _mediator.Send(new DeleteFlashcardCommand { Id = Id });
+        return result;
     }
 }
