@@ -31,30 +31,43 @@ public class FlashcardController : ControllerBase
             return NotFound();
         }
 
-        return Ok(flashcard);
+        var flashcardDto = new FlashcardDto
+        {
+            Id = flashcard.Id,
+            Question = flashcard.Question,
+            Answer = flashcard.Answer,
+            Deck = new FlashcardDeckDto
+            {
+                Id = flashcard.Deck.Id,
+                Name = flashcard.Deck.Name
+            }
+        };
+
+        return Ok(flashcardDto);
     }
 
     [HttpGet]
-    public async Task<IEnumerable<Flashcard>> GetAll()
+    public async Task<IEnumerable<FlashcardDto>> GetAll()
     {
         var flashcards = await _context.Flashcards
             .Include(d => d.Deck)
             .ToListAsync();
-        return flashcards;
-    }
 
-    [HttpGet("by-deck")]
-    public async Task<IEnumerable<Flashcard>> GetAllByDeck([FromQuery] Guid DeckId)
-    {
-        var flashcards = await _context.Flashcards
-            .Include(d => d.Deck)
-            .Where(d => d.Deck.Id == DeckId)
-            .ToListAsync();
-        return flashcards;
+        return flashcards.Select(f => new FlashcardDto
+        {
+            Id = f.Id,
+            Question = f.Question,
+            Answer = f.Answer,
+            Deck = new FlashcardDeckDto
+            {
+                Id = f.Deck.Id,
+                Name = f.Deck.Name
+            }
+        });
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] FlashcardDto flashcardDto)
+    public async Task<IActionResult> Post([FromBody] flashcardInDto flashcardDto)
     {
         var deck = await _context.Decks.FindAsync(flashcardDto.DeckId);
 
@@ -68,36 +81,37 @@ public class FlashcardController : ControllerBase
             Question = flashcardDto.Question,
             Answer = flashcardDto.Answer,
             Deck = deck
-        }; 
+        };
+        deck.Flashcards.Add(flashcard);
 
         try
         {
-            await _context.AddAsync(flashcard);
             await _context.SaveChangesAsync();
-            return Ok(flashcard);
-        } 
+            return Ok(new FlashcardDto { Id = flashcard.Id, Question = flashcard.Question, Answer = flashcard.Answer, Deck = new FlashcardDeckDto { Id = deck.Id, Name = deck.Name } });
+        }
         catch (Exception e)
         {
             return BadRequest(e.Message);
         }
-        
+
     }
 
     [HttpPut]
-    public async Task<IActionResult> Put([FromBody] Flashcard flashcard)
+    public async Task<IActionResult> Put(Guid Id, [FromBody] flashcardInDto flashcardInDto)
     {
-        var existingFlashcard = await _context.Flashcards.FindAsync(flashcard.Id);
+        var existingFlashcard = await _context.Flashcards.FindAsync(Id);
 
         if (existingFlashcard == null)
         {
             return NotFound();
         }
-
+        existingFlashcard.Question = flashcardInDto.Question;
+        existingFlashcard.Answer = flashcardInDto.Answer;
+        existingFlashcard.Deck = await _context.Decks.FindAsync(flashcardInDto.DeckId);
         try
-        { 
-            _context.Flashcards.Update(flashcard);
+        {
             await _context.SaveChangesAsync();
-            return Ok(flashcard);
+            return Ok(flashcardInDto);
         }
         catch (Exception e)
         {
