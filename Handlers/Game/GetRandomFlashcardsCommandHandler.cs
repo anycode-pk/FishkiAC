@@ -1,7 +1,5 @@
 ﻿using FishkiAC.Context;
 using FishkiAC.DTOs;
-using FishkiAC.Entities;
-using FishkiAC.Handlers.Deck;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
