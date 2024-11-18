@@ -20,25 +20,48 @@ public class DeckController : ControllerBase
     [HttpGet("{Id}")]
     public async Task<IActionResult> GetById(Guid Id)
     {
-        var deck = await _context.Decks.FindAsync(Id);
+        var deck = await _context.Decks.Include(f => f.Flashcards).Where(d => d.Id == Id).FirstOrDefaultAsync();
         if (deck == null)
         {
             return NotFound();
         }
-        return Ok(deck);
+
+        var deckDto = new DeckDto
+        {
+            Id = deck.Id,
+            Name = deck.Name,
+            Flashcards = deck.Flashcards.Select(f => new SimpleFlashcardDto
+            {
+                Id = f.Id,
+                Question = f.Question,
+                Answer = f.Answer
+            }).ToList()
+        };
+        return Ok(deckDto);
     }
 
     [HttpGet]
-    public async Task<IEnumerable<Deck>> GetAll()
+    public async Task<IEnumerable<DeckDto>> GetAll()
     {
-        var decks = await _context.Decks.ToListAsync();
-        return decks;
+        var decks = await _context.Decks.Include(f => f.Flashcards).ToListAsync();
+        var decksDto = decks.Select(d => new DeckDto
+        {
+            Id = d.Id,
+            Name = d.Name,
+            Flashcards = d.Flashcards.Select(f => new SimpleFlashcardDto
+            {
+                Id = f.Id,
+                Question = f.Question,
+                Answer = f.Answer
+            }).ToList()
+        });
+        return decksDto;
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] DeckDto deckDto)
+    public async Task<IActionResult> Post([FromBody] DeckInDto deckInDto)
     {
-        var deck = new Deck { Name = deckDto.Name };
+        var deck = new Deck { Name = deckInDto.Name };
         try
         {
             await _context.Decks.AddAsync(deck);
@@ -52,14 +75,14 @@ public class DeckController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<IActionResult> Put(Guid Id, [FromBody] DeckDto deckDto)
+    public async Task<IActionResult> Put(Guid Id, [FromBody] DeckInDto deckInDto)
     {
         var deck = await _context.Decks.FindAsync(Id);
         if (deck == null)
         {
             return NotFound();
         }
-        deck.Name = deckDto.Name;
+        deck.Name = deckInDto.Name;
         try
         {
             await _context.SaveChangesAsync();
@@ -90,6 +113,5 @@ public class DeckController : ControllerBase
         {
             return BadRequest(e.Message);
         }
-        
     }
 }
